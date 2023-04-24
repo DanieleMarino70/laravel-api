@@ -51,7 +51,7 @@ class ProjectController extends Controller
             'author' => 'required|string|max:100',
             'cover_image' => 'nullable|image|mimes:jpg,png,jpeg',
             'type_id' => 'nullable|exists:types,id',
-            // 'technologies' => 'nullable|exists:technologies, id'
+            'technologies' => 'nullable|exists:technologies,id'
         ], [
             'title.required' => 'il titolo è obbligatorio',
             'title.max' => 'il titolo deve essere massimo di 100 caratteri',
@@ -61,7 +61,7 @@ class ProjectController extends Controller
             'cover_image.image' => 'il file deve essere un\'immagine',
             'cover_image.mimes' => 'il file deve essere di tipo jpeg, jpg, png.',
             'type_id.exists' => 'id del tipo non è valido',
-            // 'technologies.exists' => 'le tecnologie selezionati non sono validi'
+            'technologies.exists' => 'le tecnologie selezionati non sono validi'
         ]);
 
         $data = $request->all();
@@ -105,7 +105,8 @@ class ProjectController extends Controller
     {
         $types = Type::all();
         $technologies = Technology::all();
-        $project_technologies = $project->technologies->pluck('id')->toArray();
+        $project_technologies = $project->technologies->pluck('id')->toArray();;
+        //dd($project_technologies);
         return view('admin.projects.edit', compact('project', 'types', 'technologies', 'project_technologies'));
     }
 
@@ -124,7 +125,7 @@ class ProjectController extends Controller
             'author' => 'required|string|max:100',
             'cover_image' => 'nullable|image|mimes:jpg,png,jpeg',
             'type_id' => 'nullable|exists:types,id',
-            'technologies' => 'nullable|exists:technologies, id'
+            'technologies' => 'nullable|exists:technologies,id'
         ], [
             'title.required' => 'il titolo è obbligatorio',
             'title.max' => 'il titolo deve essere massimo di 100 caratteri',
@@ -158,6 +159,8 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
+        if ($project->cover_image) Storage::delete($project->cover_image);
+        $project->technologies()->detach();
         $project->delete();
         return redirect()->route('projects.index');
     }
