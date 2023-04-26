@@ -40,7 +40,12 @@ class ProjectController extends Controller
      */
     public function show($id)
     {
-        //
+        $project = Project::where('id', $id)
+            ->with('type', 'technologies')
+            ->get();
+        if (!$project) return response(null, 404);
+
+        return response()->json($project);
     }
 
     /**
