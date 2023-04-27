@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ProjectMail;
 use App\Models\Project;
 use App\Models\Technology;
 use App\Models\Type;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class ProjectController extends Controller
@@ -81,6 +84,10 @@ class ProjectController extends Controller
         $project->save();
         if (Arr::exists($data, "technologies")) $project->technologies()->attach($data["technologies"]);
 
+        $mail = new ProjectMail($project);
+        $user_email = Auth::user()->email;
+        Mail::to($user_email)->send($mail);
+
         return redirect()->route('projects.show', compact('project'));
     }
 
@@ -148,6 +155,11 @@ class ProjectController extends Controller
         if (Arr::exists($data, "technologies"))
             $project->technologies()->sync($data["technologies"]);
         else $project->technologies()->detach();
+
+
+        $mail = new ProjectMail($project);
+        $user_email = Auth::user()->email;
+        Mail::to($user_email)->send($mail);
         return redirect()->route('projects.show', $project);
     }
 
